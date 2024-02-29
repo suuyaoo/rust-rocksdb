@@ -2,7 +2,3 @@
 	path = librocksdb_sys/rocksdb
 	url = https://github.com/suuyaoo/rocksdb.git
 	branch = 6.29.tikv
-[submodule "librocksdb_sys/libtitan_sys/titan"]
-	path = librocksdb_sys/libtitan_sys/titan
-	url = https://github.com/suuyaoo/titan.git
-	branch = tikv-6.5

@@ -17,7 +17,7 @@ jobs:
     rust: stable
   - os: linux
     rust: nightly
-    env: FEATURES="encryption,jemalloc,portable,sse"
+    env: FEATURES="encryption,jemalloc"
 
 env:
   global:

@@ -38,7 +38,7 @@ pub use librocksdb_sys::{
     self as crocksdb_ffi, new_bloom_filter, CompactionPriority, CompactionReason,
     DBBackgroundErrorReason, DBBottommostLevelCompaction, DBCompactionStyle, DBCompressionType,
     DBEntryType, DBInfoLogLevel, DBRateLimiterMode, DBRecoveryMode, DBStatisticsHistogramType,
-    DBStatisticsTickerType, DBStatusPtr, DBTitanDBBlobRunMode, IndexType, WriteStallCondition,
+    DBStatisticsTickerType, DBStatusPtr, IndexType, WriteStallCondition,
 };
 pub use merge_operator::MergeOperands;
 pub use metadata::{ColumnFamilyMetaData, LevelMetaData, SstFileMetaData};
@@ -62,7 +62,6 @@ pub use table_properties::{
 };
 pub use table_properties_collector::TablePropertiesCollector;
 pub use table_properties_collector_factory::TablePropertiesCollectorFactory;
-pub use titan::{TitanBlobIndex, TitanDBOptions};
 
 #[allow(deprecated)]
 pub use rocksdb::Kv;
@@ -84,7 +83,6 @@ mod table_properties_collector;
 mod table_properties_collector_factory;
 pub mod table_properties_rc;
 mod table_properties_rc_handles;
-mod titan;
 
 #[cfg(test)]
 fn tempdir_with_prefix(prefix: &str) -> tempfile::TempDir {

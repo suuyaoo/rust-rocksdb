@@ -172,19 +172,6 @@ pub enum WriteStallCondition {
 mod generated;
 pub use generated::*;
 
-#[repr(C)]
-pub struct DBTitanDBOptions(c_void);
-#[repr(C)]
-pub struct DBTitanReadOptions(c_void);
-
-#[derive(Clone, Debug, Default)]
-#[repr(C)]
-pub struct DBTitanBlobIndex {
-    pub file_number: u64,
-    pub blob_offset: u64,
-    pub blob_size: u64,
-}
-
 pub fn new_bloom_filter(bits: c_int) -> *mut DBFilterPolicy {
     unsafe { crocksdb_filterpolicy_create_bloom(bits) }
 }
@@ -364,14 +351,6 @@ pub enum DBRateLimiterMode {
     ReadOnly = 1,
     WriteOnly = 2,
     AllIo = 3,
-}
-
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
-#[repr(C)]
-pub enum DBTitanDBBlobRunMode {
-    Normal = 0,
-    ReadOnly = 1,
-    Fallback = 2,
 }
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
@@ -2168,164 +2147,6 @@ extern "C" {
     pub fn crocksdb_iostats_context_logger_nanos(ctx: *mut DBIOStatsContext) -> u64;
 
     pub fn crocksdb_run_ldb_tool(argc: c_int, argv: *const *const c_char, opts: *const Options);
-}
-
-// Titan
-extern "C" {
-    pub fn ctitandb_open_column_families(
-        path: *const c_char,
-        titan_options: *const DBTitanDBOptions,
-        num_column_families: c_int,
-        column_family_names: *const *const c_char,
-        titan_column_family_options: *const *const DBTitanDBOptions,
-        column_family_handles: *const *mut DBCFHandle,
-        err: *mut *mut c_char,
-    ) -> *mut DBInstance;
-
-    pub fn ctitandb_create_column_family(
-        db: *mut DBInstance,
-        titan_column_family_options: *const DBTitanDBOptions,
-        column_family_name: *const c_char,
-        err: *mut *mut c_char,
-    ) -> *mut DBCFHandle;
-
-    pub fn ctitandb_options_create() -> *mut DBTitanDBOptions;
-    pub fn ctitandb_options_destroy(opts: *mut DBTitanDBOptions);
-    pub fn ctitandb_options_copy(opts: *mut DBTitanDBOptions) -> *mut DBTitanDBOptions;
-    pub fn ctitandb_options_set_rocksdb_options(
-        opts: *mut DBTitanDBOptions,
-        rocksdb_opts: *const Options,
-    );
-    pub fn ctitandb_get_titan_options_cf(
-        db: *mut DBInstance,
-        cf: *mut DBCFHandle,
-    ) -> *mut DBTitanDBOptions;
-    pub fn ctitandb_get_titan_db_options(db: *mut DBInstance) -> *mut DBTitanDBOptions;
-    pub fn ctitandb_options_dirname(opts: *mut DBTitanDBOptions) -> *const c_char;
-    pub fn ctitandb_options_set_dirname(opts: *mut DBTitanDBOptions, name: *const c_char);
-    pub fn ctitandb_options_min_blob_size(opts: *mut DBTitanDBOptions) -> u64;
-    pub fn ctitandb_options_set_min_blob_size(opts: *mut DBTitanDBOptions, size: u64);
-    pub fn ctitandb_options_blob_file_compression(opts: *mut DBTitanDBOptions)
-        -> DBCompressionType;
-    pub fn ctitandb_options_set_gc_merge_rewrite(opts: *mut DBTitanDBOptions, enable: bool);
-    pub fn ctitandb_options_set_blob_file_compression(
-        opts: *mut DBTitanDBOptions,
-        t: DBCompressionType,
-    );
-
-    pub fn ctitandb_decode_blob_index(
-        value: *const u8,
-        value_size: u64,
-        index: *mut DBTitanBlobIndex,
-        errptr: *mut *mut c_char,
-    );
-    pub fn ctitandb_encode_blob_index(
-        index: &DBTitanBlobIndex,
-        value: *mut *mut u8,
-        value_size: *mut u64,
-    );
-
-    pub fn ctitandb_options_set_disable_background_gc(opts: *mut DBTitanDBOptions, disable: bool);
-    pub fn ctitandb_options_set_level_merge(opts: *mut DBTitanDBOptions, enable: bool);
-    pub fn ctitandb_options_set_range_merge(opts: *mut DBTitanDBOptions, enable: bool);
-    pub fn ctitandb_options_set_max_sorted_runs(opts: *mut DBTitanDBOptions, size: i32);
-    pub fn ctitandb_options_set_max_background_gc(opts: *mut DBTitanDBOptions, size: i32);
-    pub fn ctitandb_options_set_purge_obsolete_files_period_sec(
-        opts: *mut DBTitanDBOptions,
-        period: usize,
-    );
-    pub fn ctitandb_options_set_min_gc_batch_size(opts: *mut DBTitanDBOptions, size: u64);
-    pub fn ctitandb_options_set_max_gc_batch_size(opts: *mut DBTitanDBOptions, size: u64);
-    pub fn ctitandb_options_set_blob_cache(opts: *mut DBTitanDBOptions, cache: *mut DBCache);
-    pub fn ctitandb_options_get_blob_cache_usage(options: *const DBTitanDBOptions) -> usize;
-    pub fn ctitandb_options_set_blob_cache_capacity(
-        options: *const DBTitanDBOptions,
-        capacity: usize,
-        err: *mut *mut c_char,
-    );
-    pub fn ctitandb_options_get_blob_cache_capacity(options: *const DBTitanDBOptions) -> usize;
-
-    pub fn ctitandb_options_set_discardable_ratio(opts: *mut DBTitanDBOptions, ratio: f64);
-    pub fn ctitandb_options_set_sample_ratio(opts: *mut DBTitanDBOptions, ratio: f64);
-    pub fn ctitandb_options_set_merge_small_file_threshold(opts: *mut DBTitanDBOptions, size: u64);
-    pub fn ctitandb_options_set_blob_run_mode(opts: *mut DBTitanDBOptions, t: DBTitanDBBlobRunMode);
-
-    pub fn ctitandb_readoptions_set_key_only(opts: *mut DBTitanReadOptions, v: bool);
-
-    pub fn ctitandb_readoptions_create() -> *mut DBTitanReadOptions;
-    pub fn ctitandb_readoptions_destroy(readopts: *mut DBTitanReadOptions);
-
-    pub fn ctitandb_create_iterator(
-        db: *mut DBInstance,
-        readopts: *const DBReadOptions,
-        titan_readopts: *const DBTitanReadOptions,
-    ) -> *mut DBIterator;
-    pub fn ctitandb_create_iterator_cf(
-        db: *mut DBInstance,
-        readopts: *const DBReadOptions,
-        titan_readopts: *const DBTitanReadOptions,
-        cf_handle: *mut DBCFHandle,
-    ) -> *mut DBIterator;
-    pub fn ctitandb_delete_files_in_range(
-        db: *mut DBInstance,
-        range_start_key: *const u8,
-        range_start_key_len: size_t,
-        range_limit_key: *const u8,
-        range_limit_key_len: size_t,
-        include_end: bool,
-        err: *mut *mut c_char,
-    );
-    pub fn ctitandb_delete_files_in_range_cf(
-        db: *mut DBInstance,
-        cf: *mut DBCFHandle,
-        range_start_key: *const u8,
-        range_start_key_len: size_t,
-        range_limit_key: *const u8,
-        range_limit_key_len: size_t,
-        include_end: bool,
-        err: *mut *mut c_char,
-    );
-    pub fn ctitandb_delete_files_in_ranges_cf(
-        db: *mut DBInstance,
-        cf: *mut DBCFHandle,
-        start_keys: *const *const u8,
-        start_keys_lens: *const size_t,
-        limit_keys: *const *const u8,
-        limit_keys_lens: *const size_t,
-        num_ranges: size_t,
-        include_end: bool,
-        errptr: *mut *mut c_char,
-    );
-    pub fn ctitandb_delete_blob_files_in_range(
-        db: *mut DBInstance,
-        range_start_key: *const u8,
-        range_start_key_len: size_t,
-        range_limit_key: *const u8,
-        range_limit_key_len: size_t,
-        include_end: bool,
-        err: *mut *mut c_char,
-    );
-    pub fn ctitandb_delete_blob_files_in_range_cf(
-        db: *mut DBInstance,
-        cf: *mut DBCFHandle,
-        range_start_key: *const u8,
-        range_start_key_len: size_t,
-        range_limit_key: *const u8,
-        range_limit_key_len: size_t,
-        include_end: bool,
-        err: *mut *mut c_char,
-    );
-    pub fn ctitandb_delete_blob_files_in_ranges_cf(
-        db: *mut DBInstance,
-        cf: *mut DBCFHandle,
-        start_keys: *const *const u8,
-        start_keys_lens: *const size_t,
-        limit_keys: *const *const u8,
-        limit_keys_lens: *const size_t,
-        num_ranges: size_t,
-        include_end: bool,
-        errptr: *mut *mut c_char,
-    );
 }
 
 #[cfg(test)]
