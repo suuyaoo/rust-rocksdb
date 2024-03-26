@@ -3,7 +3,3 @@
 	url = https://github.com/tikv/rocksdb.git
 	branch = tikv-5.4
 
-[submodule "titan"]
-	path = librocksdb_sys/libtitan_sys/titan
-	url = https://github.com/tikv/titan.git
-	branch = tikv-5.2

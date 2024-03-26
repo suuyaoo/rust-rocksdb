@@ -45,7 +45,7 @@ pub use librocksdb_sys::{
     DBBackgroundErrorReason, DBBottommostLevelCompaction, DBCompactionStyle, DBCompressionType,
     DBEntryType, DBInfoLogLevel, DBRateLimiterMode, DBRecoveryMode,
     DBSstPartitionerResult as SstPartitionerResult, DBStatisticsHistogramType,
-    DBStatisticsTickerType, DBStatusPtr, DBTableFileCreationReason, DBTitanDBBlobRunMode,
+    DBStatisticsTickerType, DBStatusPtr, DBTableFileCreationReason,
     DBValueType, IndexType, WriteStallCondition,
 };
 pub use logger::Logger;
@@ -74,7 +74,6 @@ pub use table_properties::{
 };
 pub use table_properties_collector::TablePropertiesCollector;
 pub use table_properties_collector_factory::TablePropertiesCollectorFactory;
-pub use titan::{TitanBlobIndex, TitanDBOptions};
 pub use write_batch::{WriteBatch, WriteBatchIter, WriteBatchRef};
 
 #[allow(deprecated)]
@@ -100,7 +99,6 @@ mod table_properties_collector;
 mod table_properties_collector_factory;
 pub mod table_properties_rc;
 mod table_properties_rc_handles;
-mod titan;
 mod write_batch;
 
 #[cfg(test)]

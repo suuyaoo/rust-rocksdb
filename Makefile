@@ -25,16 +25,6 @@ clippy: prepare
 	-A clippy::assign_op_pattern -A clippy::new_without_default -A clippy::useless_let_if_seq \
 	-A clippy::needless_return -A clippy::len_zero
 
-update_titan:
-	@if [ -n "${TITAN_REPO}" ]; then \
-		git config --file=.gitmodules submodule.titan.url https://github.com/${TITAN_REPO}/titan.git; \
-	fi
-	@if [ -n "${TITAN_BRANCH}" ]; then \
-		git config --file=.gitmodules submodule.titan.branch ${TITAN_BRANCH}; \
-	fi
-	@git submodule sync
-	@git submodule update --init --remote librocksdb_sys/libtitan_sys/titan
-
 update_rocksdb:
 	@if [ -n "${ROCKSDB_REPO}" ]; then \
 		git config --file=.gitmodules submodule.rocksdb.url https://github.com/${ROCKSDB_REPO}/rocksdb.git; \
