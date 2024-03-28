@@ -182,25 +182,6 @@ fn test_set_ratelimiter_with_auto_tuned() {
 }
 
 #[test]
-fn test_set_writeampbasedratelimiter_with_auto_tuned() {
-    let path =
-        tempdir_with_prefix("_rust_rocksdb_test_set_write_amp_based_rate_limiter_with_auto_tuned");
-    let mut opts = DBOptions::new();
-    opts.create_if_missing(true);
-    opts.set_writeampbasedratelimiter_with_auto_tuned(
-        100 * 1024 * 1024,
-        10 * 100000,
-        DBRateLimiterMode::AllIo,
-        true,
-    );
-    let db = DB::open(opts, path.path().to_str().unwrap()).unwrap();
-    let mut opts = db.get_db_options();
-    assert!(opts.set_auto_tuned(false).is_ok(), true);
-    assert_eq!(opts.get_auto_tuned().unwrap(), false);
-    drop(db);
-}
-
-#[test]
 fn test_set_ratelimiter_bytes_per_second() {
     let path = tempdir_with_prefix("_rust_rocksdb_test_set_rate_limiter_bytes_per_second");
     let mut opts = DBOptions::new();
@@ -209,7 +190,7 @@ fn test_set_ratelimiter_bytes_per_second() {
     opts.set_ratelimiter(100 * 1024 * 1024);
     let db = DB::open(opts, path.path().to_str().unwrap()).unwrap();
     let mut opts = db.get_db_options();
-    assert!(opts.set_rate_bytes_per_sec(200 * 1024 * 1024).is_ok(), true);
+    assert!(opts.set_rate_bytes_per_sec(200 * 1024 * 1024).is_ok(), "{}", true);
     assert_eq!(opts.get_rate_bytes_per_sec().unwrap(), 200 * 1024 * 1024);
     drop(db);
 }
@@ -594,10 +575,8 @@ fn test_set_max_background_compactions_and_flushes() {
     opts.create_if_missing(true);
     opts.set_max_background_compactions(4);
     opts.set_max_background_flushes(1);
-    opts.set_base_background_compactions(2);
     assert_eq!(opts.get_max_background_compactions(), 4);
     assert_eq!(opts.get_max_background_flushes(), 1);
-    assert_eq!(opts.get_base_background_compactions(), 2);
     DB::open(opts, path.path().to_str().unwrap()).unwrap();
 }
 
@@ -922,8 +901,8 @@ fn test_compact_on_deletion() {
     opt.set_target_level(1);
     db.compact_range_cf_opt(cf, &opt, None, None);
 
-    let name = format!("rocksdb.num-files-at-level{}", 1);
-    assert_eq!(db.get_property_int(&name).unwrap(), 1);
+    let level1_prop = format!("rocksdb.num-files-at-level{}", 1);
+    assert_eq!(db.get_property_int(&level1_prop).unwrap(), 1);
 
     for i in 0..num_keys {
         if i >= num_keys - window_size && i < num_keys - window_size + dels_trigger {
@@ -933,10 +912,15 @@ fn test_compact_on_deletion() {
         }
     }
     db.flush(true).unwrap();
-    std::thread::sleep(std::time::Duration::from_millis(100));
-
-    let name = format!("rocksdb.num-files-at-level{}", 0);
-    assert_eq!(db.get_property_int(&name).unwrap(), 0);
-    let name = format!("rocksdb.num-files-at-level{}", 1);
-    assert_eq!(db.get_property_int(&name).unwrap(), 1);
+    let max_retry = 1000;
+    let level0_prop = format!("rocksdb.num-files-at-level{}", 0);
+    for _ in 0..max_retry {
+        if db.get_property_int(&level0_prop).unwrap() == 0 {
+            break;
+        } else {
+            std::thread::sleep(std::time::Duration::from_millis(100));
+        }
+    }
+    assert_eq!(db.get_property_int(&level0_prop).unwrap(), 0);
+    assert_eq!(db.get_property_int(&level1_prop).unwrap(), 1);
 }

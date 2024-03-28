@@ -37,7 +37,6 @@ use slice_transform::{new_slice_transform, SliceTransform};
 use sst_partitioner::{new_sst_partitioner_factory, SstPartitionerFactory};
 use std::ffi::{CStr, CString};
 use std::path::Path;
-use std::ptr;
 use std::sync::Arc;
 use table_filter::{destroy_table_filter, table_filter, TableFilter};
 use table_properties_collector_factory::{
@@ -127,14 +126,6 @@ impl BlockBasedOptions {
         }
     }
 
-    pub fn set_hash_index_allow_collision(&mut self, v: bool) {
-        unsafe {
-            crocksdb_ffi::crocksdb_block_based_options_set_hash_index_allow_collision(
-                self.inner, v as u8,
-            );
-        }
-    }
-
     pub fn set_partition_filters(&mut self, v: bool) {
         unsafe {
             crocksdb_ffi::crocksdb_block_based_options_set_partition_filters(self.inner, v as u8);
@@ -218,25 +209,6 @@ impl RateLimiter {
     ) -> RateLimiter {
         let limiter = unsafe {
             crocksdb_ffi::crocksdb_ratelimiter_create_with_auto_tuned(
-                rate_bytes_per_sec,
-                refill_period_us,
-                fairness,
-                mode,
-                auto_tuned,
-            )
-        };
-        RateLimiter { inner: limiter }
-    }
-
-    pub fn new_writeampbased_with_auto_tuned(
-        rate_bytes_per_sec: i64,
-        refill_period_us: i64,
-        fairness: i32,
-        mode: DBRateLimiterMode,
-        auto_tuned: bool,
-    ) -> RateLimiter {
-        let limiter = unsafe {
-            crocksdb_ffi::crocksdb_writeampbasedratelimiter_create_with_auto_tuned(
                 rate_bytes_per_sec,
                 refill_period_us,
                 fairness,
@@ -799,16 +771,6 @@ impl DBOptions {
         unsafe { crocksdb_ffi::crocksdb_options_get_max_background_compactions(self.inner) as i32 }
     }
 
-    pub fn set_base_background_compactions(&mut self, n: c_int) {
-        unsafe {
-            crocksdb_ffi::crocksdb_options_set_base_background_compactions(self.inner, n);
-        }
-    }
-
-    pub fn get_base_background_compactions(&self) -> i32 {
-        unsafe { crocksdb_ffi::crocksdb_options_get_base_background_compactions(self.inner) as i32 }
-    }
-
     pub fn set_max_background_flushes(&mut self, n: c_int) {
         unsafe {
             crocksdb_ffi::crocksdb_options_set_max_background_flushes(self.inner, n);
@@ -1031,25 +993,6 @@ impl DBOptions {
         }
     }
 
-    pub fn set_writeampbasedratelimiter_with_auto_tuned(
-        &mut self,
-        rate_bytes_per_sec: i64,
-        refill_period_us: i64,
-        mode: DBRateLimiterMode,
-        auto_tuned: bool,
-    ) {
-        let rate_limiter = RateLimiter::new_writeampbased_with_auto_tuned(
-            rate_bytes_per_sec,
-            refill_period_us,
-            DEFAULT_FAIRNESS,
-            mode,
-            auto_tuned,
-        );
-        unsafe {
-            crocksdb_ffi::crocksdb_options_set_ratelimiter(self.inner, rate_limiter.inner);
-        }
-    }
-
     pub fn set_rate_bytes_per_sec(&mut self, rate_bytes_per_sec: i64) -> Result<(), String> {
         let limiter = unsafe { crocksdb_ffi::crocksdb_options_get_ratelimiter(self.inner) };
         if limiter.is_null() {
@@ -1140,16 +1083,6 @@ impl DBOptions {
         }
     }
 
-    pub fn enable_multi_batch_write(&self, v: bool) {
-        unsafe {
-            crocksdb_ffi::crocksdb_options_set_enable_multi_batch_write(self.inner, v);
-        }
-    }
-
-    pub fn is_enable_multi_batch_write(&self) -> bool {
-        unsafe { crocksdb_ffi::crocksdb_options_is_enable_multi_batch_write(self.inner) }
-    }
-
     pub fn enable_unordered_write(&self, v: bool) {
         unsafe {
             crocksdb_ffi::crocksdb_options_set_unordered_write(self.inner, v);
@@ -1222,12 +1155,6 @@ impl DBOptions {
     pub fn set_paranoid_checks(&self, enable: bool) {
         unsafe {
             crocksdb_ffi::crocksdb_options_set_paranoid_checks(self.inner, enable as u8);
-        }
-    }
-
-    pub fn set_doubly_skiplist(&self) {
-        unsafe {
-            crocksdb_ffi::crocksdb_options_set_doubly_skip_list_rep(self.inner);
         }
     }
 
@@ -1824,12 +1751,6 @@ impl ColumnFamilyOptions {
     pub fn set_vector_memtable_factory(&mut self, reserved_bytes: u64) {
         unsafe {
             crocksdb_ffi::crocksdb_options_set_vector_memtable_factory(self.inner, reserved_bytes);
-        }
-    }
-
-    pub fn set_doubly_skiplist(&self) {
-        unsafe {
-            crocksdb_ffi::crocksdb_options_set_doubly_skip_list_rep(self.inner);
         }
     }
 

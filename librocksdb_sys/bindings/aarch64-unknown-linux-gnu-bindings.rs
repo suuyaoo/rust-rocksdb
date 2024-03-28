@@ -784,15 +784,6 @@ extern "C" {
     );
 }
 extern "C" {
-    pub fn crocksdb_write_multi_batch(
-        db: *mut crocksdb_t,
-        options: *const crocksdb_writeoptions_t,
-        batches: *mut *mut crocksdb_writebatch_t,
-        batch_size: usize,
-        errptr: *mut *mut libc::c_char,
-    );
-}
-extern "C" {
     pub fn crocksdb_get(
         db: *mut crocksdb_t,
         options: *const crocksdb_readoptions_t,
@@ -1416,12 +1407,6 @@ extern "C" {
     );
 }
 extern "C" {
-    pub fn crocksdb_block_based_options_set_block_cache_compressed(
-        options: *mut crocksdb_block_based_table_options_t,
-        block_cache_compressed: *mut crocksdb_cache_t,
-    );
-}
-extern "C" {
     pub fn crocksdb_block_based_options_set_whole_key_filtering(
         arg1: *mut crocksdb_block_based_table_options_t,
         arg2: libc::c_uchar,
@@ -1441,12 +1426,6 @@ extern "C" {
     pub fn crocksdb_block_based_options_set_index_type(
         arg1: *mut crocksdb_block_based_table_options_t,
         arg2: libc::c_int,
-    );
-}
-extern "C" {
-    pub fn crocksdb_block_based_options_set_hash_index_allow_collision(
-        arg1: *mut crocksdb_block_based_table_options_t,
-        arg2: libc::c_uchar,
     );
 }
 extern "C" {
@@ -2098,12 +2077,6 @@ extern "C" {
     pub fn crocksdb_options_set_recycle_log_file_num(arg1: *mut crocksdb_options_t, arg2: usize);
 }
 extern "C" {
-    pub fn crocksdb_options_set_soft_rate_limit(arg1: *mut crocksdb_options_t, arg2: f64);
-}
-extern "C" {
-    pub fn crocksdb_options_set_hard_rate_limit(arg1: *mut crocksdb_options_t, arg2: f64);
-}
-extern "C" {
     pub fn crocksdb_options_set_soft_pending_compaction_bytes_limit(
         opt: *mut crocksdb_options_t,
         v: usize,
@@ -2124,12 +2097,6 @@ extern "C" {
     pub fn crocksdb_options_get_hard_pending_compaction_bytes_limit(
         opt: *mut crocksdb_options_t,
     ) -> usize;
-}
-extern "C" {
-    pub fn crocksdb_options_set_rate_limit_delay_max_milliseconds(
-        arg1: *mut crocksdb_options_t,
-        arg2: libc::c_uint,
-    );
 }
 extern "C" {
     pub fn crocksdb_options_set_max_manifest_file_size(arg1: *mut crocksdb_options_t, arg2: usize);
@@ -2216,12 +2183,6 @@ extern "C" {
     );
 }
 extern "C" {
-    pub fn crocksdb_options_set_skip_log_error_on_recovery(
-        arg1: *mut crocksdb_options_t,
-        arg2: libc::c_uchar,
-    );
-}
-extern "C" {
     pub fn crocksdb_options_set_stats_dump_period_sec(
         arg1: *mut crocksdb_options_t,
         arg2: libc::c_uint,
@@ -2252,12 +2213,6 @@ extern "C" {
     pub fn crocksdb_options_set_enable_pipelined_write(
         arg1: *mut crocksdb_options_t,
         arg2: libc::c_uchar,
-    );
-}
-extern "C" {
-    pub fn crocksdb_options_set_enable_multi_batch_write(
-        opt: *mut crocksdb_options_t,
-        v: libc::c_uchar,
     );
 }
 extern "C" {
@@ -2334,9 +2289,6 @@ extern "C" {
 }
 extern "C" {
     pub fn crocksdb_options_set_hash_link_list_rep(arg1: *mut crocksdb_options_t, arg2: usize);
-}
-extern "C" {
-    pub fn crocksdb_options_set_doubly_skip_list_rep(opt: *mut crocksdb_options_t);
 }
 extern "C" {
     pub fn crocksdb_options_set_plain_table_factory(
@@ -2473,15 +2425,6 @@ extern "C" {
 }
 extern "C" {
     pub fn crocksdb_ratelimiter_create_with_auto_tuned(
-        rate_bytes_per_sec: i64,
-        refill_period_us: i64,
-        fairness: i32,
-        mode: crocksdb_ratelimiter_mode_t,
-        auto_tuned: libc::c_uchar,
-    ) -> *mut crocksdb_ratelimiter_t;
-}
-extern "C" {
-    pub fn crocksdb_writeampbasedratelimiter_create_with_auto_tuned(
         rate_bytes_per_sec: i64,
         refill_period_us: i64,
         fairness: i32,

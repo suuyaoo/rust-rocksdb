@@ -31,7 +31,7 @@ pub use compaction_filter::{
     new_compaction_filter, new_compaction_filter_factory, new_compaction_filter_raw,
     CompactionFilter, CompactionFilterContext, CompactionFilterDecision, CompactionFilterFactory,
     CompactionFilterFactoryHandle, CompactionFilterHandle, CompactionFilterValueType,
-    DBCompactionFilter,
+    DBCompactionFilter
 };
 #[cfg(feature = "encryption")]
 pub use encryption::{DBEncryptionMethod, EncryptionKeyManager, FileEncryptionInfo};

@@ -74,9 +74,10 @@ fn main() {
 
     let mut build = build_rocksdb();
 
-    build.cpp(true).file("crocksdb/c.cc");
+    build.cpp(true).file("crocksdb/c.cc")
+                   .file("crocksdb/rocksdbex/env_inspected.cc");
     if !cfg!(target_os = "windows") {
-        build.flag("-std=c++11");
+        build.flag("-std=c++17");
         build.flag("-fno-rtti");
     }
     link_cpp(&mut build);
@@ -137,10 +138,10 @@ fn build_rocksdb() -> Build {
         println!("cargo:rustc-link-lib=static=jemalloc");
     }
     if cfg!(feature = "portable") {
-        cfg.define("PORTABLE", "ON");
+        cfg.define("PORTABLE", "1");
     }
     if cfg!(feature = "sse") {
-        cfg.define("FORCE_SSE42", "ON");
+        cfg.define("FORCE_SSE42", "1");
     }
     // RocksDB cmake script expect libz.a being under ${DEP_Z_ROOT}/lib, but libz-sys crate put it
     // under ${DEP_Z_ROOT}/build. Append the path to CMAKE_PREFIX_PATH to get around it.
@@ -166,7 +167,7 @@ fn build_rocksdb() -> Build {
         .define("WITH_SNAPPY", "ON")
         .define("WITH_TESTS", "OFF")
         .define("WITH_TOOLS", "OFF")
-        .build_target("rocksdb")
+        .build_target("speedb")
         .very_verbose(true)
         .build();
     let build_dir = format!("{}/build", dst.display());
@@ -201,7 +202,7 @@ fn build_rocksdb() -> Build {
         build.define("OPENSSL", None);
     }
 
-    println!("cargo:rustc-link-lib=static=rocksdb");
+    println!("cargo:rustc-link-lib=static=speedb");
     println!("cargo:rustc-link-lib=static=z");
     println!("cargo:rustc-link-lib=static=bz2");
     println!("cargo:rustc-link-lib=static=lz4");

@@ -180,9 +180,9 @@ pub struct DBFileSystemInspectorInstance(c_void);
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 #[repr(C)]
 pub enum WriteStallCondition {
-    Normal = 0,
-    Delayed = 1,
-    Stopped = 2,
+    Delayed = 0,
+    Stopped = 1,
+    Normal = 2,
 }
 
 mod generated;
@@ -364,9 +364,9 @@ pub enum DBBottommostLevelCompaction {
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 #[repr(C)]
 pub enum DBRateLimiterMode {
-    ReadOnly = 1,
-    WriteOnly = 2,
-    AllIo = 3,
+    ReadOnly = 0,
+    WriteOnly = 1,
+    AllIo = 2,
 }
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
@@ -380,10 +380,10 @@ pub enum IndexType {
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 #[repr(C)]
 pub enum DBBackgroundErrorReason {
-    Flush = 1,
-    Compaction = 2,
-    WriteCallback = 3,
-    MemTable = 4,
+    Flush = 0,
+    Compaction = 1,
+    WriteCallback = 2,
+    MemTable = 3,
 }
 
 #[cfg(feature = "encryption")]
@@ -570,10 +570,6 @@ extern "C" {
         block_options: *mut DBBlockBasedTableOptions,
         v: IndexType,
     );
-    pub fn crocksdb_block_based_options_set_hash_index_allow_collision(
-        block_options: *mut DBBlockBasedTableOptions,
-        v: c_uchar,
-    );
     pub fn crocksdb_block_based_options_set_partition_filters(
         block_options: *mut DBBlockBasedTableOptions,
         v: c_uchar,
@@ -601,10 +597,6 @@ extern "C" {
     pub fn crocksdb_block_based_options_set_block_cache(
         block_options: *mut DBBlockBasedTableOptions,
         block_cache: *mut DBCache,
-    );
-    pub fn crocksdb_block_based_options_set_block_cache_compressed(
-        block_options: *mut DBBlockBasedTableOptions,
-        block_cache_compressed: *mut DBCache,
     );
     pub fn crocksdb_block_based_options_set_whole_key_filtering(
         ck_options: *mut DBBlockBasedTableOptions,
@@ -643,8 +635,6 @@ extern "C" {
     pub fn crocksdb_options_set_use_fsync(options: *mut Options, v: c_int);
     pub fn crocksdb_options_set_bytes_per_sync(options: *mut Options, bytes: u64);
     pub fn crocksdb_options_set_enable_pipelined_write(options: *mut Options, v: bool);
-    pub fn crocksdb_options_set_enable_multi_batch_write(options: *mut Options, v: bool);
-    pub fn crocksdb_options_is_enable_multi_batch_write(options: *mut Options) -> bool;
     pub fn crocksdb_options_set_unordered_write(options: *mut Options, v: bool);
     pub fn crocksdb_options_set_allow_concurrent_memtable_write(options: *mut Options, v: bool);
     pub fn crocksdb_options_set_manual_wal_flush(options: *mut Options, v: bool);
@@ -694,7 +684,6 @@ extern "C" {
         a1: i32,
         a2: i32,
     );
-    pub fn crocksdb_options_set_doubly_skip_list_rep(options: *mut Options);
     pub fn crocksdb_options_set_compaction_style(options: *mut Options, cs: DBCompactionStyle);
     pub fn crocksdb_options_set_fifo_compaction_options(
         options: *mut Options,
@@ -739,11 +728,6 @@ extern "C" {
         max_bg_compactions: c_int,
     );
     pub fn crocksdb_options_get_max_background_compactions(options: *const Options) -> c_int;
-    pub fn crocksdb_options_set_base_background_compactions(
-        options: *mut Options,
-        base_bg_compactions: c_int,
-    );
-    pub fn crocksdb_options_get_base_background_compactions(options: *const Options) -> c_int;
     pub fn crocksdb_options_set_max_background_flushes(
         options: *mut Options,
         max_bg_flushes: c_int,
@@ -843,13 +827,6 @@ extern "C" {
         fairness: i32,
     ) -> *mut DBRateLimiter;
     pub fn crocksdb_ratelimiter_create_with_auto_tuned(
-        rate_bytes_per_sec: i64,
-        refill_period_us: i64,
-        fairness: i32,
-        mode: DBRateLimiterMode,
-        auto_tuned: bool,
-    ) -> *mut DBRateLimiter;
-    pub fn crocksdb_writeampbasedratelimiter_create_with_auto_tuned(
         rate_bytes_per_sec: i64,
         refill_period_us: i64,
         fairness: i32,
@@ -1132,13 +1109,6 @@ extern "C" {
         db: *mut DBInstance,
         writeopts: *const DBWriteOptions,
         batch: *mut DBWriteBatch,
-        err: *mut *mut c_char,
-    );
-    pub fn crocksdb_write_multi_batch(
-        db: *mut DBInstance,
-        writeopts: *const DBWriteOptions,
-        batch: *const *mut DBWriteBatch,
-        batchlen: size_t,
         err: *mut *mut c_char,
     );
     pub fn crocksdb_writebatch_create() -> *mut DBWriteBatch;

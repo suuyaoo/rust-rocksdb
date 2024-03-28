@@ -15,7 +15,7 @@
 use crocksdb_ffi::{
     self, DBBackupEngine, DBCFHandle, DBCache, DBCompressionType, DBEnv, DBInstance, DBMapProperty,
     DBPinnableSlice, DBSequentialFile, DBStatisticsHistogramType, DBStatisticsTickerType,
-    DBTablePropertiesCollection, DBWriteBatch,
+    DBTablePropertiesCollection,
 };
 use libc::{self, c_char, c_int, c_void, size_t};
 use librocksdb_sys::DBMemoryAllocator;
@@ -69,7 +69,7 @@ fn ensure_default_cf_exists<'a>(
 ) {
     let contains = list.iter().any(|ref cf| cf.is_default());
     if !contains {
-        let mut desc = ColumnFamilyDescriptor::default();
+        let desc = ColumnFamilyDescriptor::default();
         list.push(desc);
         if ttls.len() > 0 {
             ttls.push(0);
@@ -82,7 +82,7 @@ fn split_descriptors(
 ) -> (Vec<&str>, Vec<ColumnFamilyOptions>) {
     let mut v1 = Vec::with_capacity(list.len());
     let mut v2 = Vec::with_capacity(list.len());
-    for mut d in list {
+    for d in list {
         v1.push(d.name);
         v2.push(d.options);
     }
@@ -732,25 +732,6 @@ impl DB {
         Ok(())
     }
 
-    pub fn multi_batch_write(
-        &self,
-        batches: &[WriteBatch],
-        writeopts: &WriteOptions,
-    ) -> Result<(), String> {
-        unsafe {
-            let b: Vec<*mut DBWriteBatch> = batches.iter().map(|w| w.inner).collect();
-            if !b.is_empty() {
-                ffi_try!(crocksdb_write_multi_batch(
-                    self.inner,
-                    writeopts.inner,
-                    b.as_ptr(),
-                    b.len()
-                ));
-            }
-        }
-        Ok(())
-    }
-
     pub fn write(&self, batch: &WriteBatch) -> Result<(), String> {
         self.write_opt(batch, &WriteOptions::new())
     }
@@ -811,7 +792,7 @@ impl DB {
     where
         T: Into<ColumnFamilyDescriptor<'a>>,
     {
-        let mut cfd = cfd.into();
+        let cfd = cfd.into();
         let cname = match CString::new(cfd.name.as_bytes()) {
             Ok(c) => c,
             Err(_) => {
@@ -3164,7 +3145,7 @@ mod test {
     #[test]
     fn test_load_latest_options() {
         let path = tempdir_with_prefix("_rust_rocksdb_load_latest_option");
-        let dbpath = path.path().to_str().unwrap().clone();
+        let dbpath = path.path().to_str().unwrap();
         let cf_name: &str = "cf_dynamic_level_bytes";
 
         // test when options not exist
@@ -3178,8 +3159,8 @@ mod test {
 
         let mut cf_opts = ColumnFamilyOptions::new();
         cf_opts.set_level_compaction_dynamic_level_bytes(true);
-        db.create_cf((cf_name.clone(), cf_opts)).unwrap();
-        let cf_handle = db.cf_handle(cf_name.clone()).unwrap();
+        db.create_cf((cf_name, cf_opts)).unwrap();
+        let cf_handle = db.cf_handle(cf_name).unwrap();
         let cf_opts = db.get_options_cf(cf_handle);
         assert!(cf_opts.get_level_compaction_dynamic_level_bytes());
 
@@ -3259,7 +3240,7 @@ mod test {
     #[test]
     fn test_map_property() {
         let path = tempdir_with_prefix("_rust_rocksdb_get_map_property");
-        let dbpath = path.path().to_str().unwrap().clone();
+        let dbpath = path.path().to_str().unwrap();
 
         let mut opts = DBOptions::new();
         opts.create_if_missing(true);
@@ -3268,29 +3249,6 @@ mod test {
         let cf_handle = db.cf_handle("default").unwrap();
         let mp = db.get_map_property_cf(cf_handle, "rocksdb.cfstats");
         assert!(mp.is_some());
-    }
-
-    #[test]
-    fn test_multi_batch_write() {
-        let mut opts = DBOptions::new();
-        opts.create_if_missing(true);
-        opts.enable_multi_batch_write(true);
-        let path = tempdir_with_prefix("_rust_rocksdb_multi_batch");
-
-        let db = DB::open(opts, path.path().to_str().unwrap()).unwrap();
-        let cf = db.cf_handle("default").unwrap();
-        let mut data = Vec::new();
-        for s in &[b"ab", b"cd", b"ef"] {
-            let w = WriteBatch::new();
-            w.put_cf(cf, s.to_vec().as_slice(), b"a").unwrap();
-            data.push(w);
-        }
-        db.multi_batch_write(&data, &WriteOptions::new()).unwrap();
-        for s in &[b"ab", b"cd", b"ef"] {
-            let v = db.get_cf(cf, s.to_vec().as_slice()).unwrap();
-            assert!(v.is_some());
-            assert_eq!(v.unwrap().to_utf8().unwrap(), "a");
-        }
     }
 
     #[test]

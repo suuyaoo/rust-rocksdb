@@ -26,8 +26,8 @@ fn test_rate_limiter() {
     assert_eq!(rate_limiter.get_singleburst_bytes(), 2 * 1024 * 1024);
 
     let low = 0;
-    let high = 1;
-    let total = 2;
+    let high = 2;
+    let total = 4;
 
     assert_eq!(rate_limiter.get_total_bytes_through(total), 0);
 

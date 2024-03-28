@@ -1,5 +1,4 @@
-[submodule "rocksdb"]
+[submodule "librocksdb_sys/rocksdb"]
 	path = librocksdb_sys/rocksdb
-	url = https://github.com/suuyaoo/rocksdb.git
-	branch = tikv-5.4
-
+	url = https://github.com/suuyaoo/speedb.git
+	branch = release/2.8
